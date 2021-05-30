@@ -1,6 +1,7 @@
 <div class="container">
     <div class="row">
-        <div class="col-8 mx-auto">
+        <div class="col-8 mx-auto mt-3">
+            <?= $this->session->flashdata('message'); ?>
             <table class="table">
                 <thead>
                     <tr>

@@ -7,6 +7,14 @@ class User extends CI_Controller
     {
         parent::__construct();
         $this->load->library('form_validation');
+
+        $data['user'] = $this->db->get_where('user', [
+            'email' => $this->session->userdata('email')
+        ])->row_array();
+        if ($data['user']['role_id'] != 1 && $data['user']['role_id'] != 2) {
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert"> Anda Harus Login Dulu ! </div>');
+            redirect('');
+        }
     }
 
     public function index()
@@ -15,14 +23,19 @@ class User extends CI_Controller
             'email' => $this->session->userdata('email')
         ])->row_array();
         if ($data['user']['role_id'] == 1) {
-            redirect('User/admin');
+            $this->_admin();
+            // redirect('User');
         } elseif ($data['user']['role_id'] == 2) {
-            redirect('User/member');
+            $this->_member();
+            // redirect('User/member');
+        } else {
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert"> Anda Harus Login Dulu ! </div>');
+            redirect('');
         }
         //echo "Selamat datang " . $data['user']['name'];
     }
 
-    public function admin()
+    private function _admin()
     {
         $data['user'] = $this->db->get_where('user', [
             'email' => $this->session->userdata('email')
@@ -30,22 +43,8 @@ class User extends CI_Controller
         $bonus = $this->db->get_where('data', ['id' => 1])->row_array();
         $buruh = $this->db->get_where('buruh', ['is_active' => 1])->result_array();
 
-        //untuk data bonus
         $data['pembayaran'] = $bonus['pembayaran'];
-        $data['buruhA'] = $buruh[0]['bonus'];
-        $data['buruhB'] = $buruh[1]['bonus'];
-        $data['buruhC'] = $buruh[2]['bonus'];
-
-        //untuk identitas buruh
-        $data['buruh1'] = $buruh[0];
-        $data['buruh2'] = $buruh[1];
-        $data['buruh3'] = $buruh[2];
-
-        //untuk proporsi bonus buruh
-        $data['bonus1'] = ($data['buruhA'] / 100) * $data['pembayaran'];
-        $data['bonus2'] = ($data['buruhB'] / 100) * $data['pembayaran'];
-        $data['bonus3'] = ($data['buruhC'] / 100) * $data['pembayaran'];
-
+        $data['buruh'] = $buruh;
         $data['nama_user'] = $data['user']['name'];
         $data['title'] = 'Admin Page';
         $this->load->view('templates/user_header', $data);
@@ -53,7 +52,7 @@ class User extends CI_Controller
         $this->load->view('templates/user_footer');
     }
 
-    public function member()
+    private function _member()
     {
         $data['user'] = $this->db->get_where('user', [
             'email' => $this->session->userdata('email')
@@ -61,22 +60,8 @@ class User extends CI_Controller
         $bonus = $this->db->get_where('data', ['id' => 1])->row_array();
         $buruh = $this->db->get_where('buruh', ['is_active' => 1])->result_array();
 
-        //untuk data bonus
         $data['pembayaran'] = $bonus['pembayaran'];
-        $data['buruhA'] = $buruh[0]['bonus'];
-        $data['buruhB'] = $buruh[1]['bonus'];
-        $data['buruhC'] = $buruh[2]['bonus'];
-
-        //untuk identitas buruh
-        $data['buruh1'] = $buruh[0];
-        $data['buruh2'] = $buruh[1];
-        $data['buruh3'] = $buruh[2];
-
-        //untuk proporsi bonus buruh
-        $data['bonus1'] = ($data['buruhA'] / 100) * $data['pembayaran'];
-        $data['bonus2'] = ($data['buruhB'] / 100) * $data['pembayaran'];
-        $data['bonus3'] = ($data['buruhC'] / 100) * $data['pembayaran'];
-
+        $data['buruh'] = $buruh;
         $data['nama_user'] = $data['user']['name'];
         $data['title'] = 'Member Page';
         $this->load->view('templates/member_header', $data);
@@ -87,45 +72,47 @@ class User extends CI_Controller
     public function update_pembayaran()
     {
         $pembayaran = $this->input->post('pembayaran');
-        $buruhA = $this->input->post('buruhA');
-        $buruhB = $this->input->post('buruhB');
-        $buruhC = $this->input->post('buruhC');
 
-        $total = $buruhA + $buruhB + $buruhC;
+        $this->db->like('is_active', 1);
+        $this->db->from('buruh');
+        $jumlah_buruh =  $this->db->count_all_results();
+        $data_buruh = $this->db->get_where('buruh', ['is_active' => 1])->result_array();
+        $total = 0;
+
+        for ($i = 0; $i < $jumlah_buruh; $i++) {
+            $id_buruh = $data_buruh[$i]['id'];
+            $buruh = $this->input->post($id_buruh);
+            $total += $buruh;
+        }
+
         if ($total != 100) {
-            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert"> Proporsi Pembagian Bonus Salah! Semua harus berjumlah 100 </div>');
-            redirect('User/admin');
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert"> Proporsi Pembagian harus berjumlah 100 % !</div>');
+            redirect('User');
         } else {
             $data = [
                 'pembayaran' => htmlspecialchars($pembayaran)
             ];
-
-            $data1 = [
-                'bonus' => htmlspecialchars($buruhA)
-            ];
-
-            $data2 = [
-                'bonus' => htmlspecialchars($buruhB)
-            ];
-
-            $data3 = [
-                'bonus' => htmlspecialchars($buruhC)
-            ];
-
-
             $this->db->update('data', $data);
 
-            $this->db->where('id', 1);
-            $this->db->update('buruh', $data1);
+            $this->db->like('is_active', 1);
+            $this->db->from('buruh');
+            $jumlah_buruh =  $this->db->count_all_results();
+            $data_buruh = $this->db->get_where('buruh', ['is_active' => 1])->result_array();
 
-            $this->db->where('id', 2);
-            $this->db->update('buruh', $data2);
+            for ($i = 0; $i < $jumlah_buruh; $i++) {
+                $id_buruh = $data_buruh[$i]['id'];
+                $buruh = $this->input->post($id_buruh);
+                $data = [
+                    'bonus' => htmlspecialchars($buruh)
+                ];
 
-            $this->db->where('id', 3);
-            $this->db->update('buruh', $data3);
-
-            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Berhasil memperbarui data bonus</div>');
-            redirect('User/admin');
+                $this->db->where('id', $id_buruh);
+                $this->db->update('buruh', $data);
+            }
+            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Berhasil</strong> memperbarui data bonus
+            </div>');
+            redirect('User');
         }
     }
 
@@ -167,7 +154,7 @@ class User extends CI_Controller
 
             $this->db->insert('user', $data);
             $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert"> Berhasil mendaftarkan user!</div>');
-            redirect('user/admin');
+            redirect('User/regis_page');
         }
     }
 
@@ -218,15 +205,75 @@ class User extends CI_Controller
 
     public function deleteuser($id)
     {
-        $this->db->where('id', $id);
-        $this->db->delete('user');
-        redirect('user/list_user');
+        $data['user'] = $this->db->get_where('user', [
+            'email' => $this->session->userdata('email')
+        ])->row_array();
+        $userr = $this->db->get_where('user', ['id' => $id])->row_array();
+
+        if ($data['user']['email'] == $userr['email']) {
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Gagal</strong> menghapus data user. Anda sedang login dengan akun tersebut !
+                </div>');
+            redirect('user/list_user');
+        } else {
+            $this->db->where('id', $id);
+            $this->db->delete('user');
+            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Berhasil</strong> menghapus data user
+        </div>');
+            redirect('user/list_user');
+        }
     }
 
     public function deleteburuh($id)
     {
+        $buruh = $this->db->get_where('buruh', ['id' => $id])->row_array();
+        if ($buruh['bonus'] != 0) {
+            $this->session->set_flashdata('message', '<div class="alert alert-danger" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Gagal</strong> menghapus data buruh. Data Bonus Buruh haru 0% dulu !
+                </div>');
+            redirect('user/list_buruh');
+        } else {
+            $this->db->where('id', $id);
+            $this->db->delete('buruh');
+            $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Berhasil</strong> menghapus data buruh
+                </div>');
+            redirect('user/list_buruh');
+        }
+    }
+
+    public function regisburuh()
+    {
+        $data = [
+            'nama' => htmlspecialchars($this->input->post('nama', true)),
+            'posisi' => htmlspecialchars($this->input->post('posisi', true)),
+            'bonus' => 0,
+            'is_active' => 1
+        ];
+
+        $this->db->insert('buruh', $data);
+        $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Berhasil</strong> menambahkan data buruh
+        </div>');
+        redirect('user/list_buruh');
+    }
+
+    public function updateburuh($id)
+    {
+        $data = [
+            'id' => htmlspecialchars($this->input->post('id', true)),
+            'nama' => htmlspecialchars($this->input->post('nama', true)),
+            'posisi' => htmlspecialchars($this->input->post('posisi', true)),
+            'bonus' => htmlspecialchars($this->input->post('bonus', true)),
+            'is_active' => 1
+        ];
+
         $this->db->where('id', $id);
-        $this->db->delete('buruh');
+        $this->db->update('buruh', $data);
+        $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> <strong>Berhasil</strong> memperbarui data buruh
+        </div>');
         redirect('user/list_buruh');
     }
 }
