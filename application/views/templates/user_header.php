@@ -19,6 +19,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js">
     </script>
 
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </head>
 
 <body>
@@ -39,7 +42,7 @@
 
         <ul class="nav flex-column bg-white mb-0">
             <li class="nav-item">
-                <a href="<?= base_url('user/admin') ?>" class="nav-link text-dark font-italic bg-light">
+                <a href="<?= base_url('user') ?>" class="nav-link text-dark font-italic bg-light">
                     <i class="fa fa-th-large mr-3 text-primary fa-fw"></i>
                     Beranda
                 </a>
@@ -59,9 +62,12 @@
             <li class="nav-item">
                 <a href="<?= base_url('user/list_buruh') ?>" class="nav-link text-dark font-italic">
                     <i class="fa fa-address-card mr-3 text-primary fa-fw"></i>
-                    List Buruh
+                    Data Buruh
                 </a>
             </li>
         </ul>
+        <p style="margin-top: 90%;">
+            <center>@Triadi Kurniawan - 2021</center>
+        </p>
     </div>
     <!-- End vertical navbar -->

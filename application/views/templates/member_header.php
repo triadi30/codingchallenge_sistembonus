@@ -39,7 +39,7 @@
 
         <ul class="nav flex-column bg-white mb-0">
             <li class="nav-item">
-                <a href="<?= base_url('user/member') ?>" class="nav-link text-dark font-italic bg-light">
+                <a href="<?= base_url('user') ?>" class="nav-link text-dark font-italic bg-light">
                     <i class="fa fa-th-large mr-3 text-primary fa-fw"></i>
                     Beranda
                 </a>

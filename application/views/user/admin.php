@@ -19,64 +19,46 @@
                 <div class="form-group row">
                     <label for="staticEmail" class="col-sm-2 col-form-label">Pembayaran</label>
                     <div class="col-sm-5 ml-3">
-                        <input type="text" class="form-control-plaintext text-center" name="pembayaran" value="<?= $pembayaran; ?>">
+                        <input type="text" class="form-control-plaintext text-center uang" name="pembayaran" value="<?= $pembayaran; ?>">
                     </div>
+                    <div class="col-sm-3 mt-2">Rupiah</div>
                 </div>
-                <div class="form-group row">
-                    <label for="buruh" class="col-sm-2 col-form-label"><?= $buruh1['nama']; ?></label>
-                    <div class="col-sm-5 ml-3">
-                        <input type="text" class="form-control text-center" name="buruhA" id="buruhA" placeholder="Persentase Bonus" value="<?= $buruhA; ?>">
+
+                <?php $no = 1;
+                foreach ($buruh as $b) : ?>
+
+                    <div class="form-group row">
+                        <label for="buruh" class="col-sm-2 col-form-label"><?= $b['nama']; ?></label>
+                        <div class="col-sm-5 ml-3">
+                            <input type="text" class="form-control text-center" name="<?= $b['id']; ?>" id="<?= $b['id']; ?>" placeholder="Persentase Bonus" value="<?= $b['bonus']; ?>">
+                        </div>
+                        <div class="col-sm-3">%</div>
                     </div>
-                    <div class="col-sm-3">%</div>
-                </div>
-                <div class="form-group row">
-                    <label for="buruh" class="col-sm-2 col-form-label"><?= $buruh2['nama']; ?></label>
-                    <div class="col-sm-5 ml-3">
-                        <input type="text" class="form-control text-center" name="buruhB" id="buruhB" placeholder="Persentase Bonus" value="<?= $buruhB; ?>">
-                    </div>
-                    <div class="col-sm-3">%</div>
-                </div>
-                <div class="form-group row">
-                    <label for="buruh" class="col-sm-2 col-form-label"><?= $buruh3['nama']; ?></label>
-                    <div class="col-sm-5 ml-3">
-                        <input type="text" class="form-control text-center" name="buruhC" id="buruhC" placeholder="Persentase Bonus" value="<?= $buruhC; ?>">
-                    </div>
-                    <div class="col-sm-3">%</div>
-                </div>
+
+                <?php $no++;
+                endforeach; ?>
+
                 <div class="form-group row">
                     <div for="buruh" class="col-sm-2 col-form-label"><button type="submit" class="btn btn-success">Save</button></div>
                 </div>
             </form>
         </div>
+
+
         <div class="col-lg-6">
-            <div class="card text-white bg-success mb-3 mx-auto" style="max-width: 18rem;">
-                <div class="card-header"><?= $buruh1['posisi']; ?></div>
-                <div class="card-body">
-                    <h5 class="card-title">Nama : <?= $buruh1['nama']; ?></h5>
-                    <p class="card-text">
-                        Bonus : <?= $bonus1 ?>
-                    </p>
+            <?php foreach ($buruh as $b) : ?>
+                <div class="card text-white bg-success mb-3 mx-auto" style="max-width: 18rem;">
+                    <div class="card-header"><?= $b['posisi']; ?></div>
+                    <div class="card-body">
+                        <h5 class="card-title">Nama : <?= $b['nama']; ?></h5>
+                        <p class="card-text">
+                            Bonus : Rp. <?= number_format($b['bonus'] / 100 * $pembayaran, 0, ".", "."); ?>
+                        </p>
+                    </div>
                 </div>
-            </div>
-            <div class="card text-white bg-success mb-3 mx-auto" style="max-width: 18rem;">
-                <div class="card-header"><?= $buruh2['posisi']; ?></div>
-                <div class="card-body">
-                    <h5 class="card-title">Nama : <?= $buruh2['nama']; ?></h5>
-                    <p class="card-text">
-                        Bonus : <?= $bonus2 ?>
-                    </p>
-                </div>
-            </div>
-            <div class="card text-white bg-success mb-3 mx-auto" style="max-width: 18rem;">
-                <div class="card-header"><?= $buruh3['posisi']; ?></div>
-                <div class="card-body">
-                    <h5 class="card-title">Nama : <?= $buruh3['nama']; ?></h5>
-                    <p class="card-text">
-                        Bonus : <?= $bonus3 ?>
-                    </p>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
+
     </div>
 
 </div>
